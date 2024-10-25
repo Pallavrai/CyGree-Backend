@@ -1,0 +1,6 @@
+django-ninja
+django-cors-headers
+django-ninja-extra
+django-ninja-jwt
+ninja-schema
+django-unfold
