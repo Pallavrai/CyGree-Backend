@@ -25,4 +25,4 @@ class UserProfileSchemaIn(ModelSchema):
 class UserProfileSchemaOut(ModelSchema):
     class Meta:
         model = UserProfile
-        fields = ["id", "user", "profile_pic", "role", "address", "phone_number"]
+        fields = ["user", "profile_pic", "role", "address", "phone_number"]
