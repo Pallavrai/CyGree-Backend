@@ -9,7 +9,11 @@ from ninja_extra import (
     ModelSchemaConfig,
     api_controller,
     NinjaExtraAPI,
-    
+    http_post,  
+    http_get,   
+    http_put,   
+    http_patch, 
+    http_delete 
 )
 from main.models import UserProfile
 from ninja import Swagger
@@ -76,20 +80,32 @@ class UserModelController(ModelControllerBase):
 api.register_controllers(UserModelController)
 
 #Hold extra information related to user to setup its profile
-@api_controller("/profile", tags=["Profile"], auth=JWTAuth())
-class ProfileModelController(ModelControllerBase):
-    model_config = ModelConfig(
-        model=UserProfile,
-        allowed_routes=['create', "find_one", "update", "patch", "delete"],
-        schema_config=ModelSchemaConfig(read_only_fields=["id"]),
-    )
-    def get_object_or_none(self, request, *args, **kwargs):
-        user_id = kwargs.get('user__id')
-        print(**kwargs)
-        if user_id:
-            return self.model.objects.filter(user__id=user_id).first()
-        return super().get_object(request, *args, **kwargs)
+@api_controller('/profile', tags=['UserOperations'], auth=JWTAuth())
+class ProfileModelController:
+
+    @http_get('/{user_id}', response=UserProfileSchemaOut)
+    def find_one(self, request, user_id: int):
+        """Retrieve a user profile by user ID"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        return profile
+
+    # @http_put('/{user_id}', response=UserProfileSchemaOut)
+    # def update_profile(self, request, user_id: int, data: UserProfileSchemaIn):
+    #     """Update a user profile by user ID"""
+    #     profile = UserProfile.objects.get(user__id=user_id)
+    #     for attr, value in data.dict().items():
+    #         setattr(profile, attr, value)
+    #     profile.save()
+    #     return profile
+
+    @http_patch('/{user_id}', response=UserProfileSchemaOut)
+    def patch_profile(self, request, user_id: int, data: UserProfileSchemaIn):
+        """Partially update a user profile by user ID"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        for attr, value in data.dict().items():
+            if value is not None:
+                setattr(profile, attr, value)
+        profile.save()
+        return profile
 
 api.register_controllers(ProfileModelController)
-
-
