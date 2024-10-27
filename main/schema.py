@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from ninja import ModelSchema
 from ninja import Schema,Field
 from main.models import UserProfile
+from typing import Optional
 
 
 class UserSchemaIn(ModelSchema):
@@ -20,9 +21,10 @@ class LoginSchema(Schema):
 class UserProfileSchemaIn(ModelSchema):
     class Meta:
         model = UserProfile
-        fields = ["profile_pic", "role", "address", "phone_number"]
+        fields = ["profile_pic","role", "address", "phone_number"]
 
 class UserProfileSchemaOut(ModelSchema):
+    profile_pic:Optional[str] = None
     class Meta:
         model = UserProfile
         fields = ["user", "profile_pic", "role", "address", "phone_number"]

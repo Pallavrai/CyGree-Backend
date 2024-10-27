@@ -3,6 +3,7 @@ from .schema import *
 from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_jwt.authentication import JWTAuth
 from django.contrib.auth.models import User
+from typing import Optional
 from ninja_extra import (
     ModelConfig,
     ModelControllerBase,
@@ -16,10 +17,11 @@ from ninja_extra import (
     http_delete 
 )
 from main.models import UserProfile
-from ninja import Swagger
+from ninja import Swagger,UploadedFile,File
 from django.contrib.auth import authenticate
 from ninja_jwt.tokens import RefreshToken
 from django.http import JsonResponse
+from django.core.files.storage import FileSystemStorage
 
 api = NinjaExtraAPI(title="CyGree",description="""
   <p>Cygree is designed to transform the way we handle plastic waste. This API enables users to recycle plastics efficiently while earning valuable incentives.</p>
@@ -79,8 +81,11 @@ class UserModelController(ModelControllerBase):
     )
 api.register_controllers(UserModelController)
 
+STORAGE = FileSystemStorage()
+
+
 #Hold extra information related to user to setup its profile
-@api_controller('/profile', tags=['UserOperations'], auth=JWTAuth())
+@api_controller('/profile', tags=['UserOperations'])
 class ProfileModelController:
 
     @http_get('/{user_id}', response=UserProfileSchemaOut)
@@ -98,13 +103,18 @@ class ProfileModelController:
     #     profile.save()
     #     return profile
 
-    @http_patch('/{user_id}', response=UserProfileSchemaOut)
-    def patch_profile(self, request, user_id: int, data: UserProfileSchemaIn):
+    @http_post('/{user_id}', response=UserProfileSchemaOut)
+    def patch_profile(self, request, user_id: int, data: UserProfileSchemaIn = None, pic:File[UploadedFile]=None):
         """Partially update a user profile by user ID"""
         profile = UserProfile.objects.get(user__id=user_id)
-        for attr, value in data.dict().items():
-            if value is not None:
-                setattr(profile, attr, value)
+    
+        if data:
+            for attr, value in data.dict().items():
+                if value is not None:
+                    setattr(profile, attr, value)
+        if pic:
+            profile.profile_pic.save(pic.name, pic)
+        
         profile.save()
         return profile
 
