@@ -4,6 +4,7 @@ from django.utils import timezone
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic=models.ImageField(upload_to='profile_pics/',default='profile_pics/default.jpg')
     role = models.CharField(max_length=100, choices=[('Client', 'Client'), ('Agent', 'Agent')],default='Client')
     address = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
@@ -12,12 +13,20 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
-
+    
+''' 
+User will request for plastic collection with its picture and amount then
+agent will claim the request and collect the plastic during this phase status will be pending
+after collecting the plastic agent will update the status to collected
+and we will initiate reward for user based on the amount of plastic collected
+'''
 class PlasticCollection(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    agent=models.ForeignKey(UserProfile, on_delete=models.SET_NULL, related_name='agent',null=True)
+    collection_pic=models.ImageField(upload_to='plastic_collection/',default='default.jpg')
     amount_collected = models.DecimalField(max_digits=6, decimal_places=2)
     collection_date = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Collected', 'Collected')], default='Pending')
+    status = models.CharField(max_length=50, choices=[('Request', 'Request'),('Pending', 'Pending'), ('Collected', 'Collected')], default='Request')
 
     def __str__(self):
         return f"{self.user.user.username} - {self.amount_collected} kg"

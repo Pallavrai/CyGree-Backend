@@ -8,10 +8,11 @@ from ninja_extra import (
     ModelControllerBase,
     ModelSchemaConfig,
     api_controller,
-    NinjaExtraAPI
+    NinjaExtraAPI,
+    
 )
 from main.models import UserProfile
-
+from ninja import Swagger
 from django.contrib.auth import authenticate
 from ninja_jwt.tokens import RefreshToken
 from django.http import JsonResponse
@@ -29,7 +30,7 @@ api = NinjaExtraAPI(title="CyGree",description="""
   </ul>
   
   <p>By integrating Cygree, businesses and developers can contribute to a greener planet while engaging users in a rewarding recycling journey. Together, we can reduce plastic waste and create a sustainable future.</p>
-""",
+""",urls_namespace='api',docs=Swagger({"persistAuthorization": True})
                     )
 
 api.register_controllers(NinjaJWTDefaultController)
@@ -37,7 +38,7 @@ api.register_controllers(NinjaJWTDefaultController)
 #First create user with basic details
 #Password updation and other critical operations are performed on user model
 
-@api.post('/user/login',tags=['Login'])
+@api.post('/user/login',tags=['Login'],url_name='login')
 def login(request, data: LoginSchema):
         user = authenticate(username=data.username, password=data.password)
         if user:
@@ -54,13 +55,13 @@ def login(request, data: LoginSchema):
 
 
 
-@api.post('/user/register',tags=['Register'],response=UserSchemaOut)
+@api.post('user/register',tags=['Register'],url_name='register',response=UserSchemaOut)
 def Register(request, data:UserSchemaIn):
     user=User.objects.create_user(username=data.username,password=data.password,first_name=data.first_name
                                   ,last_name=data.last_name)
     profile=UserProfile.objects.create(user=user)
-    profile.save()
     user.save()
+    profile.save()
     return user
 
 @api_controller("/user",tags=["UserOperations"])
@@ -75,13 +76,20 @@ class UserModelController(ModelControllerBase):
 api.register_controllers(UserModelController)
 
 #Hold extra information related to user to setup its profile
-@api_controller("/profile",tags=["Profile"],auth=JWTAuth())
+@api_controller("/profile", tags=["Profile"], auth=JWTAuth())
 class ProfileModelController(ModelControllerBase):
     model_config = ModelConfig(
         model=UserProfile,
-        allowed_routes=['create',"find_one", "update", "patch", "delete"],
+        allowed_routes=['create', "find_one", "update", "patch", "delete"],
         schema_config=ModelSchemaConfig(read_only_fields=["id"]),
     )
+    def get_object_or_none(self, request, *args, **kwargs):
+        user_id = kwargs.get('user__id')
+        print(**kwargs)
+        if user_id:
+            return self.model.objects.filter(user__id=user_id).first()
+        return super().get_object(request, *args, **kwargs)
+
 api.register_controllers(ProfileModelController)
 
 

@@ -1,4 +1,6 @@
-#!/mnt/Vultr/cy_gree/src/backend/env/bin/python3
+#!/bin/sh
+'''exec' "/home/pallav/Desktop/CyGree Backend/env/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys

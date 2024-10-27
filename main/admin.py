@@ -30,6 +30,12 @@ class GroupAdmin(BaseGroupAdmin, ModelAdmin):
 
 
 @admin.register(UserProfile)
-class CustomAdminClass(ModelAdmin):
+class UserProfileAdminClass(ModelAdmin):
     pass
 
+@admin.register(PlasticCollection)
+class PlasticCollectionAdminClass(ModelAdmin):
+    pass
+@admin.register(Incentive)
+class PlasticCollectionAdminClass(ModelAdmin):
+    pass

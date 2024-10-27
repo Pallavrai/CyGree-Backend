@@ -4,3 +4,4 @@ django-ninja-extra
 django-ninja-jwt
 ninja-schema
 django-unfold
+Pillow
