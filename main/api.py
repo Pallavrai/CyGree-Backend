@@ -10,6 +10,7 @@ from ninja_extra import (
     ModelSchemaConfig,
     api_controller,
     NinjaExtraAPI,
+    permissions,
     http_post,  
     http_get,   
     http_put,   
@@ -19,7 +20,7 @@ from ninja_extra import (
 from main.models import *
 from ninja import Swagger,UploadedFile,File
 from django.contrib.auth import authenticate
-from ninja_jwt.tokens import RefreshToken
+from ninja_jwt.tokens import RefreshToken,AccessToken
 from django.http import JsonResponse
 
 api = NinjaExtraAPI(title="CyGree",description="""
@@ -40,13 +41,22 @@ api = NinjaExtraAPI(title="CyGree",description="""
 
 api.register_controllers(NinjaJWTDefaultController)
 
+class IsOwner(permissions.BasePermission):
+    def has_permission(self, request, controller):
+        # Implement the required method
+        return True
+
+    def has_object_permission(self, request, controller, obj):
+        return request.auth.id == obj.user.id
+
 #First create user with basic details
 #Password updation and other critical operations are performed on user model
 
-@api.post('/user/login',tags=['Login'],url_name='login')
+@api.post('/user/login', tags=['Login'], url_name='login')
 def login(request, data: LoginSchema):
-        user = authenticate(username=data.username, password=data.password)
-        if user:
+    user = authenticate(username=data.username, password=data.password)
+    if user:
+        try:
             profile = UserProfile.objects.get(user=user)
             role = "Admin" if user.is_superuser else profile.role
             refresh = RefreshToken.for_user(user)
@@ -56,7 +66,9 @@ def login(request, data: LoginSchema):
                 'refresh': str(refresh),
                 'role': role
             })
-        return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'error': 'User profile does not exist'}, status=400)
+    return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 
 
@@ -74,14 +86,14 @@ class UserModelController(ModelControllerBase):
     service=UserModelService(model=User)
     model_config = ModelConfig(
         model = User,
-        allowed_routes=["update", "delete"],
+        allowed_routes=["patch", "delete"],
         schema_config=ModelSchemaConfig(include=["id","password","username","first_name","last_name","email","is_active","date_joined"],
                                         write_only_fields=["id","password"]),
     )
 api.register_controllers(UserModelController)
 
 #Hold extra information related to user to setup its profile
-@api_controller('/profile', tags=['UserOperations'],auth=JWTAuth())
+@api_controller('/profile', tags=['UserOperations'],auth=JWTAuth(),permissions=[IsOwner])
 class ProfileModelController:
 
     @http_get('/{user_id}', response=UserProfileSchemaOut)
@@ -117,7 +129,7 @@ class ProfileModelController:
 api.register_controllers(ProfileModelController)
 
 #Client based operations
-@api_controller('/client', tags=['ClientOperations'],auth=JWTAuth())
+@api_controller('/client', tags=['ClientOperations'],auth=JWTAuth(),permissions=[IsOwner])
 class ClientModelController:
 
     @http_get('/{user_id}', response=dict)
