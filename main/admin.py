@@ -1,5 +1,5 @@
 from django.contrib import admin
-from main.models import UserProfile,PlasticCollection,Incentive
+from main.models import *
 from unfold.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
@@ -36,6 +36,14 @@ class UserProfileAdminClass(ModelAdmin):
 @admin.register(PlasticCollection)
 class PlasticCollectionAdminClass(ModelAdmin):
     pass
-@admin.register(Incentive)
+@admin.register(ListReward)
+class PlasticCollectionAdminClass(ModelAdmin):
+    pass
+
+@admin.register(Notification)
+class PlasticCollectionAdminClass(ModelAdmin):
+    pass
+
+@admin.register(Reward)
 class PlasticCollectionAdminClass(ModelAdmin):
     pass
