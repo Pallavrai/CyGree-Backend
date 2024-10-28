@@ -43,11 +43,15 @@ api.register_controllers(NinjaJWTDefaultController)
 
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, controller):
-        # Implement the required method
-        return True
-
-    def has_object_permission(self, request, controller, obj):
-        return request.auth.id == obj.user.id
+        # Allow access only if the user id is same as obj user id
+        user_id = request.path.split('/')
+        for i in user_id:
+            if(i.isnumeric()):
+                return request.auth.id == int(i)
+        return False
+    # def has_object_permission(self, request, controller, obj):
+    #     # Allow access only if the authenticated user is the owner of the object
+    #     return request.auth.id == obj.user.id
 
 #First create user with basic details
 #Password updation and other critical operations are performed on user model
@@ -96,8 +100,8 @@ api.register_controllers(UserModelController)
 @api_controller('/profile', tags=['UserOperations'],auth=JWTAuth(),permissions=[IsOwner])
 class ProfileModelController:
 
-    @http_get('/{user_id}', response=UserProfileSchemaOut)
-    def find_one(self, request, user_id: int):
+    @http_get('/{user_id}', response=UserProfileSchemaOut, url_name='get_user')
+    def Get_user(self, request, user_id: int):
         """Retrieve a user profile by user ID"""
         profile = UserProfile.objects.get(user__id=user_id)
         return profile
