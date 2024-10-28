@@ -63,7 +63,7 @@ def login(request, data: LoginSchema):
 @api.post('user/register',tags=['Register'],url_name='register',response=UserSchemaOut)
 def Register(request, data:UserSchemaIn):
     user=User.objects.create_user(username=data.username,password=data.password,first_name=data.first_name
-                                  ,last_name=data.last_name)
+                                  ,last_name=data.last_name, email=data.email)
     profile=UserProfile.objects.create(user=user)
     user.save()
     profile.save()
