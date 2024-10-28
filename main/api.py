@@ -16,12 +16,11 @@ from ninja_extra import (
     http_patch, 
     http_delete 
 )
-from main.models import UserProfile
+from main.models import *
 from ninja import Swagger,UploadedFile,File
 from django.contrib.auth import authenticate
 from ninja_jwt.tokens import RefreshToken
 from django.http import JsonResponse
-from django.core.files.storage import FileSystemStorage
 
 api = NinjaExtraAPI(title="CyGree",description="""
   <p>Cygree is designed to transform the way we handle plastic waste. This API enables users to recycle plastics efficiently while earning valuable incentives.</p>
@@ -81,9 +80,6 @@ class UserModelController(ModelControllerBase):
     )
 api.register_controllers(UserModelController)
 
-STORAGE = FileSystemStorage()
-
-
 #Hold extra information related to user to setup its profile
 @api_controller('/profile', tags=['UserOperations'])
 class ProfileModelController:
@@ -119,3 +115,103 @@ class ProfileModelController:
         return profile
 
 api.register_controllers(ProfileModelController)
+
+#Client based operations
+@api_controller('/client', tags=['ClientOperations'])
+class ClientModelController:
+
+    @http_get('/{user_id}', response=dict)
+    def get_total_points(self, request, user_id: int):
+        """Retrieve total points of a user and plastic collected(in kg)"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        return {'total_points': profile.earned_points,'plastic_collected': profile.total_plastic_recycled}
+
+    @http_get('/{user_id}/badges', response=list)
+    def get_badges(self, request, user_id: int):
+        """Retrieve badges earned by a user"""
+        badges = Badge.objects.filter(user__id=user_id)
+        return [{'name': badge.name, 'issued_date': badge.issued_date} for badge in badges]
+    
+    @http_post('/{user_id}/collection', response=dict)
+    def post_collection_request(self, request, user_id: int, amount_collected: float, pic: UploadedFile):
+        """Post a request for plastic collection with an image of plastic waste"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        collection = PlasticCollection.objects.create(
+            user=profile,
+            amount_collected=amount_collected,
+            collection_pic=pic,
+            status='Request'
+        )
+        collection.collection_pic.save(pic.name, pic)
+        collection.save()
+        return {'message': 'Collection request posted successfully'}
+    @http_get('/{user_id}/history', response=dict)
+    def get_history(self, request, user_id: int):
+        """Retrieve history of plastic collections showing pending and completed requests"""
+        unclaimed_requests = PlasticCollection.objects.filter(user__id=user_id, status='Request')
+        pending_requests = PlasticCollection.objects.filter(user__id=user_id, status='Pending')
+        completed_requests = PlasticCollection.objects.filter(user__id=user_id, status='Collected')
+        return {
+            'unclaimed_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in unclaimed_requests],
+            'pending_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in pending_requests],
+            'completed_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in completed_requests]
+        }
+    @http_get('/{user_id}/rewards', response=list)
+    def list_claimable_rewards(self, request, user_id: int):
+        """List all claimable rewards for a user"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        claimed_rewards = Reward.objects.filter(user__id=user_id).values_list('reward__id', flat=True)
+        claimable_rewards = ListReward.objects.exclude(id__in=claimed_rewards).filter(points_required__lte=profile.earned_points)
+        return [{'id': reward.id, 'name': reward.title, 'points_required': reward.points_required} for reward in claimable_rewards]
+
+    @http_post('/{user_id}/rewards/{reward_id}/claim', response=dict)
+    def claim_reward(self, request, user_id: int, reward_id: int):
+        """Claim a reward for a user"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        reward = ListReward.objects.get(id=reward_id)
+        
+        if profile.earned_points >= reward.points_required:
+            Reward.objects.create(user=profile, reward=reward)
+            profile.save()
+            return {'message': 'Reward claimed successfully'}
+        return JsonResponse({'error': 'Not enough points to claim this reward'}, status=400)
+
+    @http_get('/{user_id}/rewards/history', response=list)
+    def claimed_rewards_history(self, request, user_id: int):
+        """Retrieve claimed rewards history of a user"""
+        claimed_rewards = Reward.objects.filter(user__id=user_id)
+        return [{'name': reward.reward.title, 'claimed_date': reward.claimed_date} for reward in claimed_rewards]
+
+api.register_controllers(ClientModelController)
+
+@api_controller('/notifications', tags=['Notifications'])
+class NotificationModelController:
+
+    @http_post('/send', response=dict)
+    def send_notification(self, request, user_id: int, message: str, importance_level: Optional[str] = 'Low'):
+        """Send a notification to a user"""
+        profile = UserProfile.objects.get(user__id=user_id)
+        notification = Notification.objects.create(
+            user=profile,
+            message=message,
+            importance_level=importance_level
+        )
+        notification.save()
+        return {'message': 'Notification sent successfully'}
+
+    @http_get('/{user_id}', response=list)
+    def get_notifications(self, request, user_id: int):
+        """Retrieve all notifications for a user"""
+        notifications = Notification.objects.filter(to_user__id=user_id).order_by('-notification_date')
+        return [{ 'id': notification.id,'message': notification.message, 'notification_date': notification.notification_date, 'is_read': notification.is_read} for notification in notifications]
+
+    @http_patch('/{notification_id}/read', response=dict)
+    def mark_as_read(self, request, notification_id: int):
+        """Mark a notification as read"""
+        notification = Notification.objects.get(id=notification_id)
+        notification.is_read = True
+        notification.save()
+        return {'message': 'Notification marked as read'}
+
+api.register_controllers(NotificationModelController)
+

@@ -21,10 +21,11 @@ class LoginSchema(Schema):
 class UserProfileSchemaIn(ModelSchema):
     class Meta:
         model = UserProfile
-        fields = ["profile_pic","role", "address", "phone_number"]
+        fields = ["profile_pic", "role", "address", "phone_number", "state", "city", "country"]
 
 class UserProfileSchemaOut(ModelSchema):
-    profile_pic:Optional[str] = None
+    user: UserSchemaOut
+    profile_pic: Optional[str] = None
     class Meta:
         model = UserProfile
-        fields = ["user", "profile_pic", "role", "address", "phone_number"]
+        fields = ["user", "profile_pic", "role", "address", "phone_number", "state", "city", "country", "total_plastic_recycled", "earned_points"]
