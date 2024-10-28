@@ -11,7 +11,7 @@ class UserModelService(ModelService):
         instance = self.model._default_manager.create(**data)
         return instance
 
-    def update(self, instance, schema, **kwargs):
+    def patch(self, instance, schema, **kwargs):
         data = schema.model_dump(exclude_unset=True)
         if 'password' in data:
             data['password'] = make_password(data['password'])
