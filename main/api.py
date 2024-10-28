@@ -69,7 +69,7 @@ def Register(request, data:UserSchemaIn):
     profile.save()
     return user
 
-@api_controller("/user",tags=["UserOperations"])
+@api_controller("/user",tags=["UserOperations"],auth=JWTAuth())
 class UserModelController(ModelControllerBase):
     service=UserModelService(model=User)
     model_config = ModelConfig(
@@ -81,7 +81,7 @@ class UserModelController(ModelControllerBase):
 api.register_controllers(UserModelController)
 
 #Hold extra information related to user to setup its profile
-@api_controller('/profile', tags=['UserOperations'])
+@api_controller('/profile', tags=['UserOperations'],auth=JWTAuth())
 class ProfileModelController:
 
     @http_get('/{user_id}', response=UserProfileSchemaOut)
@@ -117,7 +117,7 @@ class ProfileModelController:
 api.register_controllers(ProfileModelController)
 
 #Client based operations
-@api_controller('/client', tags=['ClientOperations'])
+@api_controller('/client', tags=['ClientOperations'],auth=JWTAuth())
 class ClientModelController:
 
     @http_get('/{user_id}', response=dict)
@@ -184,7 +184,7 @@ class ClientModelController:
 
 api.register_controllers(ClientModelController)
 
-@api_controller('/notifications', tags=['Notifications'])
+@api_controller('/notifications', tags=['Notifications'],auth=JWTAuth())
 class NotificationModelController:
 
     @http_post('/send', response=dict)
