@@ -104,7 +104,7 @@ and we will initiate reward for user based on the amount of plastic collected
 '''
 class PlasticCollection(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    agent=models.ForeignKey(UserProfile, on_delete=models.SET_NULL, related_name='agent',null=True)
+    agent=models.ForeignKey(UserProfile, on_delete=models.SET_NULL, related_name='agent',null=True,blank=True)
     collection_pic=models.ImageField(upload_to='plastic_collection/',default='default.jpg')
     amount_collected = models.DecimalField(max_digits=6, decimal_places=2)
     collection_date = models.DateTimeField(default=timezone.now)

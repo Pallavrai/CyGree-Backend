@@ -22,6 +22,7 @@ from ninja import Swagger,UploadedFile,File
 from django.contrib.auth import authenticate
 from ninja_jwt.tokens import RefreshToken,AccessToken
 from django.http import JsonResponse
+from django.db.models import Q
 
 api = NinjaExtraAPI(title="CyGree",description="""
   <p>Cygree is designed to transform the way we handle plastic waste. This API enables users to recycle plastics efficiently while earning valuable incentives.</p>
@@ -231,3 +232,54 @@ class NotificationModelController:
 
 api.register_controllers(NotificationModelController)
 
+
+@api_controller('/agent', tags=['AgentOperations'],permissions=[IsOwner],auth=JWTAuth())
+class AgentModelController:
+
+    @http_get('/{user_id}/requests', response=list)
+    def list_requests(self, request, user_id: int):
+        """List all unclaimed collection requests, optionally filtered by city or state with fuzzy search"""
+        agent_profile = UserProfile.objects.get(user__id=user_id)
+        
+        # Use agent's city and state if they are set and not empty
+        city = agent_profile.city
+        state = agent_profile.state
+        
+        filters = Q(status='Request')
+        if city and state:
+            filters &= Q(user__city__icontains=city)
+            filters &= Q(user__state__icontains=state)
+        else:
+            return [{'message': 'Please update your profile details, especially your location'}]
+        
+        requests = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
+        return [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date, 'user_id': req.user.user.id} for req in requests]
+
+    @http_post('/{user_id}/claim', response=dict)
+    def claim_collection_request(self, request, user_id: int, collection_id: int):
+        """Agent claims a plastic collection request"""
+        collection = PlasticCollection.objects.get(id=collection_id, status='Request')
+        collection.status = 'Pending'
+        collection.agent = UserProfile.objects.get(user__id=user_id)
+        collection.save()
+        return {'message': 'Collection request claimed successfully'}
+
+    @http_patch('/{user_id}/collect', response=dict)
+    def collect_plastic(self, request, user_id: int, collection_id: int):
+        """Agent updates the status of a collection request to collected"""
+        collection = PlasticCollection.objects.get(id=collection_id, agent__user__id=user_id, status='Pending')
+        collection.status = 'Collected'
+        collection.save()
+        return {'message': 'Plastic collected successfully'}
+
+    @http_get('/{user_id}/history', response=dict)
+    def get_agent_requests(self, request, user_id: int):
+        """Retrieve pending and completed requests claimed by the agent"""
+        pending_requests = PlasticCollection.objects.filter(agent__user__id=user_id, status='Pending')
+        completed_requests = PlasticCollection.objects.filter(agent__user__id=user_id, status='Collected')
+        return {
+            'pending_requests': [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in pending_requests],
+            'completed_requests': [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in completed_requests]
+        }
+
+api.register_controllers(AgentModelController)

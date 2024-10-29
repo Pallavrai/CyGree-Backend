@@ -4,3 +4,7 @@
 db.sqlite3
 env/
 __pycache__/
+/media/plastic_collection
+/media/*
+!/media/**/default.jpg
+!/media/default.jpg
