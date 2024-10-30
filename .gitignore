@@ -7,5 +7,5 @@ __pycache__/
 !/media/default.jpg
 .vscode
 /media/plastic_collection
-/media/profile_pics/*.png
+/media/profile_pics/
 !/media/profile_pics/default.jpg
