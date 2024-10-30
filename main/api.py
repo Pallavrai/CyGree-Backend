@@ -177,8 +177,8 @@ class ClientModelController:
     def list_claimable_rewards(self, user_id: int):
         """List all claimable rewards for a user"""
         profile = UserProfile.objects.get(user__id=user_id)
-        claimed_rewards = Reward.objects.filter(user__id=user_id).values_list('reward__id', flat=True)
-        claimable_rewards = ListReward.objects.filter(points_required__lte=profile.earned_points).exclude(id__in=claimed_rewards)
+        claimed_rewards = Reward.objects.filter(user__user__id=user_id).values_list('reward__id', flat=True)
+        claimable_rewards = ListReward.objects.exclude(pk__in=claimed_rewards).filter(points_required__lte=profile.earned_points)
         return [{'id': reward.id, 'name': reward.title, 'points_required': reward.points_required} for reward in claimable_rewards]
 
     @http_post('/{user_id}/rewards/{reward_id}/claim', response=dict)
