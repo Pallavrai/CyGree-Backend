@@ -37,13 +37,17 @@ class UserProfileAdminClass(ModelAdmin):
 class PlasticCollectionAdminClass(ModelAdmin):
     pass
 @admin.register(ListReward)
-class PlasticCollectionAdminClass(ModelAdmin):
+class ListRewardAdminClass(ModelAdmin):
     pass
 
 @admin.register(Notification)
-class PlasticCollectionAdminClass(ModelAdmin):
+class NotificationAdminClass(ModelAdmin):
     pass
 
 @admin.register(Reward)
-class PlasticCollectionAdminClass(ModelAdmin):
+class RewardAdminClass(ModelAdmin):
+    pass
+
+@admin.register(Badge)
+class BadgeAdminClass(ModelAdmin):
     pass

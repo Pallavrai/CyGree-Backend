@@ -4,7 +4,8 @@
 db.sqlite3
 env/
 __pycache__/
-/media/plastic_collection
-/media/*
-!/media/**/default.jpg
 !/media/default.jpg
+.vscode
+/media/plastic_collection
+/media/profile_pics/*.png
+!/media/profile_pics/default.jpg
