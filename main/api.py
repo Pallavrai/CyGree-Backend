@@ -20,7 +20,7 @@ from ninja_extra import (
 from main.models import *
 from ninja import Swagger,UploadedFile,File
 from django.contrib.auth import authenticate
-from ninja_jwt.tokens import RefreshToken,AccessToken
+from ninja_jwt.tokens import RefreshToken
 from django.http import JsonResponse
 from django.db.models import Q
 
@@ -242,8 +242,6 @@ class AgentModelController:
     def list_requests(self, request, user_id: int):
         """List all unclaimed collection requests, optionally filtered by city or state with fuzzy search"""
         agent_profile = UserProfile.objects.get(user__id=user_id)
-        
-        # Use agent's city and state if they are set and not empty
         city = agent_profile.city
         state = agent_profile.state
         
