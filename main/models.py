@@ -150,6 +150,8 @@ class Reward(models.Model):
                 raise ValidationError(
                     ('Not enough points to claim this reward'))
             super().save(*args, **kwargs)
+        class Meta:
+            unique_together = ["user", "reward"]
 
 class Badge(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

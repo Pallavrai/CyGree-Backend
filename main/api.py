@@ -174,11 +174,11 @@ class ClientModelController:
             'completed_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in completed_requests]
         }
     @http_get('/{user_id}/rewards', response=list)
-    def list_claimable_rewards(self, request, user_id: int):
+    def list_claimable_rewards(self, user_id: int):
         """List all claimable rewards for a user"""
         profile = UserProfile.objects.get(user__id=user_id)
         claimed_rewards = Reward.objects.filter(user__id=user_id).values_list('reward__id', flat=True)
-        claimable_rewards = ListReward.objects.exclude(id__in=claimed_rewards).filter(points_required__lte=profile.earned_points)
+        claimable_rewards = ListReward.objects.filter(points_required__lte=profile.earned_points).exclude(id__in=claimed_rewards)
         return [{'id': reward.id, 'name': reward.title, 'points_required': reward.points_required} for reward in claimable_rewards]
 
     @http_post('/{user_id}/rewards/{reward_id}/claim', response=dict)
@@ -188,16 +188,19 @@ class ClientModelController:
         reward = ListReward.objects.get(id=reward_id)
         
         if profile.earned_points >= reward.points_required:
-            Reward.objects.create(user=profile, reward=reward)
-            profile.save()
-            return {'message': 'Reward claimed successfully'}
+            obj,created = Reward.objects.get_or_create(user=profile, reward=reward)
+            if created:
+                return {'message': 'Reward claimed successfully'}
+            else:
+                return JsonResponse({'error': 'Already Claimed.'}, status=400)
+            
         return JsonResponse({'error': 'Not enough points to claim this reward'}, status=400)
 
     @http_get('/{user_id}/rewards/history', response=list)
     def claimed_rewards_history(self, request, user_id: int):
         """Retrieve claimed rewards history of a user"""
-        claimed_rewards = Reward.objects.filter(user__id=user_id)
-        return [{'name': reward.reward.title, 'claimed_date': reward.claimed_date} for reward in claimed_rewards]
+        claimed_rewards = Reward.objects.filter(user__user__id=user_id)
+        return [{'title': reward.reward.title, 'claimed_date': reward.claimed_date} for reward in claimed_rewards]
 
 api.register_controllers(ClientModelController)
 
