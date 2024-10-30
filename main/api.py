@@ -207,12 +207,11 @@ api.register_controllers(ClientModelController)
 @api_controller('/notifications', tags=['Notifications'],auth=JWTAuth())
 class NotificationModelController:
 
-    @http_post('/send', response=dict)
+    @http_post('/{user_id}/send', response=dict)
     def send_notification(self, request, user_id: int, message: str, importance_level: Optional[str] = 'Low'):
         """Send a notification to a user"""
-        profile = UserProfile.objects.get(user__id=user_id)
         notification = Notification.objects.create(
-            user=profile,
+            user=user_id,
             message=message,
             importance_level=importance_level
         )
@@ -222,7 +221,7 @@ class NotificationModelController:
     @http_get('/{user_id}', response=list)
     def get_notifications(self, request, user_id: int):
         """Retrieve all notifications for a user"""
-        notifications = Notification.objects.filter(to_user__id=user_id).order_by('-notification_date')
+        notifications = Notification.objects.filter(to_user__user__id=user_id).order_by('-notification_date')
         return [{ 'id': notification.id,'message': notification.message, 'notification_date': notification.notification_date, 'is_read': notification.is_read} for notification in notifications]
 
     @http_patch('/{notification_id}/read', response=dict)
