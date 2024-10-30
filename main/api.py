@@ -150,7 +150,7 @@ class ClientModelController:
         return [{'name': badge.name, 'issued_date': badge.issued_date} for badge in badges]
     
     @http_post('/{user_id}/collection', response=dict)
-    def post_collection_request(self, request, user_id: int, amount_collected: float, pic: UploadedFile):
+    def post_collection_request(self, user_id: int, amount_collected: float, pic: UploadedFile):
         """Post a request for plastic collection with an image of plastic waste"""
         profile = UserProfile.objects.get(user__id=user_id)
         collection = PlasticCollection.objects.create(
@@ -165,9 +165,9 @@ class ClientModelController:
     @http_get('/{user_id}/history', response=dict)
     def get_history(self, request, user_id: int):
         """Retrieve history of plastic collections showing pending and completed requests"""
-        unclaimed_requests = PlasticCollection.objects.filter(user__id=user_id, status='Request')
-        pending_requests = PlasticCollection.objects.filter(user__id=user_id, status='Pending')
-        completed_requests = PlasticCollection.objects.filter(user__id=user_id, status='Collected')
+        unclaimed_requests = PlasticCollection.objects.filter(user__user__id=user_id, status='Request')
+        pending_requests = PlasticCollection.objects.filter(user__user__id=user_id, status='Pending')
+        completed_requests = PlasticCollection.objects.filter(user__user__id=user_id, status='Collected')
         return {
             'unclaimed_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in unclaimed_requests],
             'pending_requests': [{'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in pending_requests],
