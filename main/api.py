@@ -146,7 +146,7 @@ class ClientModelController:
     @http_get('/{user_id}/badges', response=list)
     def get_badges(self, request, user_id: int):
         """Retrieve badges earned by a user"""
-        badges = Badge.objects.filter(user__id=user_id)
+        badges = Badge.objects.filter(user__user__id=user_id)
         return [{'name': badge.name, 'issued_date': badge.issued_date} for badge in badges]
     
     @http_post('/{user_id}/collection', response=dict)
