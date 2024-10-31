@@ -222,16 +222,27 @@ class NotificationModelController:
     def get_notifications(self, request, user_id: int):
         """Retrieve all notifications for a user"""
         notifications = Notification.objects.filter(to_user__user__id=user_id).order_by('-notification_date')
-        notifications.update(is_read=True)
         return [{ 'id': notification.id,'message': notification.message, 'notification_date': notification.notification_date, 'is_read': notification.is_read} for notification in notifications]
 
-    # @http_patch('/{notification_id}/read', response=dict)
-    # def mark_as_read(self, request, notification_id: int):
-    #     """Mark a notification as read"""
-    #     notification = Notification.objects.get(id=notification_id)
-    #     notification.is_read = True
-    #     notification.save()
-    #     return {'message': 'Notification marked as read'}
+    @http_patch('/{notification_id}/read', response=dict)
+    def mark_as_read(self, request, notification_id: int):
+        """Mark a notification as read"""
+        try:
+            notification = Notification.objects.get(id=notification_id)
+        except Notification.DoesNotExist:
+            return {'message': 'Notification does not exist'}
+        notification.is_read = True
+        notification.save()
+        return {'message': 'Notification marked as read'}
+    @http_patch('/{user_id}/read/all', response=dict)
+    def mark_all_read(self, request, user_id: int):
+        """Mark a notification as read"""
+        notifications = Notification.objects.filter(to_user__user__id=user_id,is_read=False).order_by('-notification_date')
+        if notifications.exists():
+            notifications.update(is_read=True)
+            return {'message': 'All Notifications marked as read'}
+        
+        return {'message': 'Already marked as read'}
 
 api.register_controllers(NotificationModelController)
 
