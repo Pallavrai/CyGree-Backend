@@ -222,15 +222,16 @@ class NotificationModelController:
     def get_notifications(self, request, user_id: int):
         """Retrieve all notifications for a user"""
         notifications = Notification.objects.filter(to_user__user__id=user_id).order_by('-notification_date')
+        notifications.update(is_read=True)
         return [{ 'id': notification.id,'message': notification.message, 'notification_date': notification.notification_date, 'is_read': notification.is_read} for notification in notifications]
 
-    @http_patch('/{notification_id}/read', response=dict)
-    def mark_as_read(self, request, notification_id: int):
-        """Mark a notification as read"""
-        notification = Notification.objects.get(id=notification_id)
-        notification.is_read = True
-        notification.save()
-        return {'message': 'Notification marked as read'}
+    # @http_patch('/{notification_id}/read', response=dict)
+    # def mark_as_read(self, request, notification_id: int):
+    #     """Mark a notification as read"""
+    #     notification = Notification.objects.get(id=notification_id)
+    #     notification.is_read = True
+    #     notification.save()
+    #     return {'message': 'Notification marked as read'}
 
 api.register_controllers(NotificationModelController)
 
