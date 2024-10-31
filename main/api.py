@@ -153,6 +153,8 @@ class ClientModelController:
     def post_collection_request(self, user_id: int, amount_collected: float, pic: UploadedFile):
         """Post a request for plastic collection with an image of plastic waste"""
         profile = UserProfile.objects.get(user__id=user_id)
+        if not profile.city or not profile.state:
+            return JsonResponse({'error': 'Please update your profile details, especially your location'}, status=400)
         collection = PlasticCollection.objects.create(
             user=profile,
             amount_collected=amount_collected,
