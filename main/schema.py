@@ -19,6 +19,7 @@ class LoginSchema(Schema):
     password:str
 
 class UserProfileSchemaIn(ModelSchema):
+    profile_pic: Optional[str] = None
     class Meta:
         model = UserProfile
         fields = ["profile_pic", "role", "address", "phone_number", "state", "city", "country"]

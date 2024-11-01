@@ -117,19 +117,28 @@ class ProfileModelController:
     #     return profile
 
     @http_post('/{user_id}', response=UserProfileSchemaOut)
-    def patch_profile(self, request, user_id: int, data: UserProfileSchemaIn = None, pic:File[UploadedFile]=None):
+    @http_patch('/{user_id}', response=UserProfileSchemaOut)
+    def patch_profile(self, request, user_id: int, data: UserProfileSchemaIn = None, pic: File[UploadedFile] = None):
         """Partially update a user profile by user ID"""
         profile = UserProfile.objects.get(user__id=user_id)
-    
-        if data:
-            for attr, value in data.dict().items():
-                if value is not None:
-                    setattr(profile, attr, value)
-        if pic:
-            profile.profile_pic.save(pic.name, pic)
-        
-        profile.save()
-        return profile
+        fields=UserProfileSchemaIn.Meta.fields
+        try:
+            if data:
+                for attr, value in data.dict().items():
+
+                    if attr in fields:
+                        if value is not None:
+                            setattr(profile, attr, value)
+                    else:
+
+                        return JsonResponse({'error': f'Invalid field: {str(e)}'}, status=400)
+            if pic:
+                profile.profile_pic.save(pic.name, pic)
+            
+            profile.save()
+            return profile  
+        except Exception as e:
+            return JsonResponse({'error': f'Error during update: {str(e)}'}, status=500)
 
 api.register_controllers(ProfileModelController)
 
