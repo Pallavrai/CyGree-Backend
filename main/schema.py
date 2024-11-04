@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from ninja import ModelSchema
 from ninja import Schema,Field
-from main.models import UserProfile
+from main.models import UserProfile,PlasticCollection
 from typing import Optional
 
 
@@ -24,9 +24,26 @@ class UserProfileSchemaIn(ModelSchema):
         model = UserProfile
         fields = ["profile_pic", "role", "address", "phone_number", "state", "city", "country"]
 
+
 class UserProfileSchemaOut(ModelSchema):
     user: UserSchemaOut
     profile_pic: Optional[str] = None
     class Meta:
         model = UserProfile
         fields = ["user", "profile_pic", "role", "address", "phone_number", "state", "city", "country", "total_plastic_recycled", "earned_points"]
+
+
+class ClientData(ModelSchema):
+    class Meta:
+        model = UserProfile
+        fields = ["profile_pic", "address", "phone_number", "state", "city", "country"]
+
+class ListCollection(ModelSchema):
+    user: ClientData
+    collection_pic: Optional[str] = None
+    class Meta:
+        model = PlasticCollection
+        fields = ["user", "collection_pic", "amount_collected", "collection_date"]
+
+class ErrorSchema(Schema):
+    message: str

@@ -261,8 +261,8 @@ api.register_controllers(NotificationModelController)
 @api_controller('/agent', tags=['AgentOperations'],permissions=[IsOwner],auth=JWTAuth())
 class AgentModelController:
 
-    @http_get('/{user_id}/requests', response=list)
-    def list_requests(self, request, user_id: int):
+    @http_get('/{user_id}/requests', response={ 200:ListCollection, 406:ErrorSchema})
+    def list_requests(self, user_id: int):
         """List all unclaimed collection requests, optionally filtered by city or state with fuzzy search"""
         agent_profile = UserProfile.objects.get(user__id=user_id)
         city = agent_profile.city
@@ -273,15 +273,10 @@ class AgentModelController:
             filters &= Q(user__city__icontains=city)
             filters &= Q(user__state__icontains=state)
         else:
-            return [{'message': 'Please update your profile details, especially your location'}]
+            return 406,{'message': 'Please update your profile details, especially your location'}
         
-        requests = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
-        return [{'id': req.id, 'image':req.collection_pic,
-                 'amount_collected': req.amount_collected, 
-                 'collection_date': req.collection_date, 
-                 'user_id': req.user.user.id,
-                 'city':req.user.user.city,
-                 'state':req.user.user.state} for req in requests]
+        res = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
+        return 200,res
 
     @http_post('/{user_id}/claim', response=dict)
     def claim_collection_request(self, request, user_id: int, collection_id: int):
