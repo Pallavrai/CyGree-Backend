@@ -276,7 +276,12 @@ class AgentModelController:
             return [{'message': 'Please update your profile details, especially your location'}]
         
         requests = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
-        return [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date, 'user_id': req.user.user.id} for req in requests]
+        return [{'id': req.id, 'image':req.collection_pic,
+                 'amount_collected': req.amount_collected, 
+                 'collection_date': req.collection_date, 
+                 'user_id': req.user.user.id,
+                 'city':req.user.user.city,
+                 'state':req.user.user.state} for req in requests]
 
     @http_post('/{user_id}/claim', response=dict)
     def claim_collection_request(self, request, user_id: int, collection_id: int):
@@ -301,8 +306,12 @@ class AgentModelController:
         pending_requests = PlasticCollection.objects.filter(agent__user__id=user_id, status='Pending')
         completed_requests = PlasticCollection.objects.filter(agent__user__id=user_id, status='Collected')
         return {
-            'pending_requests': [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in pending_requests],
-            'completed_requests': [{'id': req.id, 'amount_collected': req.amount_collected, 'collection_date': req.collection_date} for req in completed_requests]
+            'pending_requests': [{'id': req.id, 
+                                  'amount_collected': req.amount_collected, 
+                                  'collection_date': req.collection_date} for req in pending_requests],
+            'completed_requests': [{'id': req.id, 
+                                    'amount_collected': req.amount_collected,
+                                    'collection_date': req.collection_date} for req in completed_requests]
         }
 
 api.register_controllers(AgentModelController)
