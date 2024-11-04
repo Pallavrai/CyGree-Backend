@@ -5,3 +5,4 @@ django-ninja-jwt
 ninja-schema
 django-unfold
 Pillow
+python-dotenv
