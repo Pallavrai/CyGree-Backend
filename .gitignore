@@ -9,3 +9,4 @@ __pycache__/
 /media/plastic_collection
 /media/profile_pics/
 !/media/profile_pics/default.jpg
+/static
