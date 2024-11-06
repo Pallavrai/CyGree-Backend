@@ -43,7 +43,7 @@ class ListCollection(ModelSchema):
     collection_pic: Optional[str] = None
     class Meta:
         model = PlasticCollection
-        fields = ["user", "collection_pic", "amount_collected", "collection_date"]
+        fields = ["id","user", "collection_pic", "amount_collected", "collection_date"]
 
 class ErrorSchema(Schema):
     message: str

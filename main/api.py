@@ -3,7 +3,7 @@ from .schema import *
 from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_jwt.authentication import JWTAuth
 from django.contrib.auth.models import User
-from typing import Optional
+from typing import List, Optional
 from ninja_extra import (
     ModelConfig,
     ModelControllerBase,
@@ -258,10 +258,10 @@ class NotificationModelController:
 api.register_controllers(NotificationModelController)
 
 
-@api_controller('/agent', tags=['AgentOperations'],permissions=[IsOwner],auth=JWTAuth())
+@api_controller('/agent', tags=['AgentOperations'],auth=JWTAuth())
 class AgentModelController:
 
-    @http_get('/{user_id}/requests', response={ 200:ListCollection, 406:ErrorSchema})
+    @http_get('/{user_id}/requests', response={ 200:List[ListCollection], 406:ErrorSchema})
     def list_requests(self, user_id: int):
         """List all unclaimed collection requests, optionally filtered by city or state with fuzzy search"""
         agent_profile = UserProfile.objects.get(user__id=user_id)
@@ -272,11 +272,11 @@ class AgentModelController:
         if city and state:
             filters &= Q(user__city__icontains=city)
             filters &= Q(user__state__icontains=state)
+            res = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
+            return 200,res
         else:
             return 406,{'message': 'Please update your profile details, especially your location'}
         
-        res = PlasticCollection.objects.filter(filters).order_by('user__city', 'user__state')
-        return 200,res
 
     @http_post('/{user_id}/claim', response=dict)
     def claim_collection_request(self, request, user_id: int, collection_id: int):
