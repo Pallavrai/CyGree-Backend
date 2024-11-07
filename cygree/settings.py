@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv("SECRET_KEY","django-insecure-(by-%ym=+3h4^6=7wxv$ixp5oi)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG","True")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['139.84.175.191','139.84.177.243','localhost','127.0.0.1','cy-gree.vercel.app']
 
 
 # Application definition
@@ -67,7 +67,10 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [ 
+    'http://139.84.177.243',
+    'cy-gree.vercel.app'
+    ]
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'cygree.urls'
