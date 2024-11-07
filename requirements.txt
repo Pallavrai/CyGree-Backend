@@ -1,4 +1,5 @@
 whitenoise
+django
 django-ninja
 django-cors-headers
 django-ninja-extra
