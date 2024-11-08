@@ -23,6 +23,7 @@ from django.contrib.auth import authenticate
 from ninja_jwt.tokens import RefreshToken
 from django.http import JsonResponse
 from django.db.models import Q
+from django.middleware.csrf import get_token
 
 api = NinjaExtraAPI(title="CyGree",description="""
   <p>Cygree is designed to transform the way we handle plastic waste. This API enables users to recycle plastics efficiently while earning valuable incentives.</p>
