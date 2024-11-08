@@ -29,12 +29,19 @@ SECRET_KEY = os.getenv("SECRET_KEY","django-insecure-(by-%ym=+3h4^6=7wxv$ixp5oi)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG","True")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'http://139.84.177.243',
+    'http://localhost',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://0.0.0.0:8000',
+    ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     "unfold",  # before django.contrib.admin
     "unfold.contrib.filters",  # optional, if special filters are needed
     "unfold.contrib.forms",  # optional, if special form elements are needed
@@ -48,7 +55,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
     'ninja',
     'ninja_extra',
     'ninja_jwt',
@@ -56,6 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -64,10 +71,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://139.84.177.243',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://0.0.0.0:8000',
+]
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'cygree.urls'

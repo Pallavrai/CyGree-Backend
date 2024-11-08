@@ -37,7 +37,7 @@ api = NinjaExtraAPI(title="CyGree",description="""
   </ul>
   
   <p>By integrating Cygree, businesses and developers can contribute to a greener planet while engaging users in a rewarding recycling journey. Together, we can reduce plastic waste and create a sustainable future.</p>
-""",urls_namespace='api',docs=Swagger({"persistAuthorization": True})
+""",csrf=True,urls_namespace='api',docs=Swagger({"persistAuthorization": True})
                     )
 
 api.register_controllers(NinjaJWTDefaultController)
@@ -56,6 +56,10 @@ class IsOwner(permissions.BasePermission):
 
 #First create user with basic details
 #Password updation and other critical operations are performed on user model
+@api.get("/set-csrf-token")
+def get_csrf_token(request):
+    return {"csrftoken": get_token(request)}
+
 
 @api.post('/user/login', tags=['Login'], url_name='login')
 def login(request, data: LoginSchema):
