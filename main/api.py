@@ -38,7 +38,7 @@ api = NinjaExtraAPI(title="CyGree",description="""
   </ul>
   
   <p>By integrating Cygree, businesses and developers can contribute to a greener planet while engaging users in a rewarding recycling journey. Together, we can reduce plastic waste and create a sustainable future.</p>
-""",csrf=True,urls_namespace='api',docs=Swagger({"persistAuthorization": True})
+""",urls_namespace='api',docs=Swagger({"persistAuthorization": True})
                     )
 
 api.register_controllers(NinjaJWTDefaultController)
