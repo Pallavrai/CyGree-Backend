@@ -30,6 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY","django-insecure-(by-%ym=+3h4^6=7wxv$ixp5oi)
 DEBUG = os.getenv("DEBUG","True")
 
 ALLOWED_HOSTS = [
+    '139.84.175.191',
     '127.0.0.1',
     '139.84.177.243',
     'localhost',
@@ -73,6 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CSRF_TRUSTED_ORIGINS = [
+    'http://139.84.175.191',
     'http://139.84.177.243',
     'http://localhost:3000',
     'http://localhost:8000',
