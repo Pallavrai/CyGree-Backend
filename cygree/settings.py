@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '139.84.177.243',
     'localhost',
+    'cy-gree.vercel.app'
     '0.0.0.0',
     ]
 
@@ -77,6 +78,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     'http://0.0.0.0:8000',
+    'https://cy-gree.vercel.app',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
