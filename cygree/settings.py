@@ -30,11 +30,10 @@ SECRET_KEY = os.getenv("SECRET_KEY","django-insecure-(by-%ym=+3h4^6=7wxv$ixp5oi)
 DEBUG = os.getenv("DEBUG","True")
 
 ALLOWED_HOSTS = [
-    'http://139.84.177.243',
-    'http://localhost',
-    'http://localhost:3000',
-    'http://localhost:8000',
-    'http://0.0.0.0:8000',
+    '127.0.0.1',
+    '139.84.177.243',
+    'localhost',
+    '0.0.0.0',
     ]
 
 
