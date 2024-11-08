@@ -72,7 +72,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+CSRF_TRUSTED_ORIGINS = [
+    'http://139.84.177.243',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://0.0.0.0:8000',
+    'https://cy-gree.vercel.app',
+]
 CORS_ALLOWED_ORIGINS = [
     'http://139.84.177.243',
     'http://localhost:3000',
