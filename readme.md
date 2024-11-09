@@ -18,61 +18,61 @@ Ensure you have the following installed:
 ### Step 1: Change current directory
 
 Assuming you are already in cygree repo
-`bash
-cd src/backend
-`
+```bash
+cd CyGree-Backend
+```
 
 ### Step 2: Create a Virtual Environment
 
 Create a virtual environment to isolate your project dependencies.
 
-`bash
+```bash
 python -m venv venv
-`
+```
 
 Activate the virtual environment:
 
 - On Windows:
-  `bash
+  ```bash
   venv\Scripts\activate
-  `
+  ```
 
 - On macOS/Linux:
-  `bash
+  ```bash
   source venv/bin/activate
-  `
+  ```
 
 ### Step 3: Install Dependencies
 
 Make sure you are in the project directory and install the required packages:
 
-`bash
+```bash
 pip install -r requirements.txt
-`
+```
 
 ### Step 4: Apply Migrations
 
 Before running the project, apply the necessary migrations:
 
-`bash
+```bash
 python manage.py migrate
-`
+```
 
 ### Step 5: Create a Superuser (Optional)
 
 To access the Django admin panel, create a superuser account:
 
-`bash
+```bash
 python manage.py createsuperuser
-`
+```
 
 ### Step 6: Run the Development Server
 
 Start the Django development server:
 
-`bash
+```bash
 python manage.py runserver
-`
+```
 
 You can now access the project at `http://127.0.0.1:8000/`.
 
